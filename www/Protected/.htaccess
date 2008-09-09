@@ -1,0 +1,8 @@
+<Files "*.inc">
+	order deny,allow
+	deny from all
+</Files>
+<Files "*.txt">
+	order deny,allow
+	deny from all
+</Files>

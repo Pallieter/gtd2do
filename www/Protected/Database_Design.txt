@@ -1,0 +1,206 @@
+*** GTD2Do Database Design
+
+Tables:
+	- 2Do_Users
+	- 2Do_Tasks
+	- 2Do_Contexts
+	- 2Do_Projects
+	- 2Do_CheckLists
+	- 2Do_Settings
+	- 2Do_Translations
+	- FF: 2Do_Groups
+	- FF: 2Do_UsersGroups
+
+* 2Do_Users                     	MyISAM			Contains all language-specific texts (including language-unspecific texts the SA needs to be able to modify via an @-IF).
+
+	- ID				INT			aU
+	- UID
+	- PWD
+	- Name				TinyText
+	- DateBorn			DATE
+	- DateCreated			DATETIME
+	- DateLogin			DATETIME
+	- NotifyEmail			BOOL			Notify me via email if a task is assigned to me.
+	- Status			TINYINT			BitMask: 1 = isActive, 2 = isAdmin
+	- Token				TinyText
+	- TokenRSS			TinyText
+
+
+* 2Do_Tasks	                    	MyISAM			Contains all
+
+	- ID
+	- UserID
+	- ContextID
+	- ProjectID
+	- Name
+	- Duration			MediumINT
+	- Notes
+	- DateDue
+	- DateCreated
+	- Sorting
+	- Status			TinyINT			BitMask: 1 = isDone, 2 = inProgress
+
+
+* 2Do_Contexts	                    	MyISAM			Contains all
+
+	- ID
+	- UserID
+	- Name
+	- DateCreated
+	- Sorting
+	- Status			TINYINT			BitMask: 1 = isActive
+
+
+* 2Do_Projects	                    	MyISAM			Contains all
+
+	- ID
+	- UserID
+	- Name
+	- Description
+	- Postponed			DATETIME		Allow a task to be postponed for a pre selected period (5 min, 15 min, 30 min, 1 hour, 1 day, 1 week, 1 month)
+	- DateCreated
+	- Sorting
+	- Status			TinyINT			BitMask: 1 = isDone
+
+
+* 2Do_CheckLists	               	MyISAM			Contains all
+
+	- ID
+	- ProjectID
+	- Name
+	- Sorting
+	- DateCreated
+	- Status			TINYINT			BitMask: 1 = isActive
+
+
+* 2Do_Translations                     	MyISAM			Contains all language-specific texts.
+
+       	- ID                            INT			aU
+       	- Name                         	TinyText		This contains a caller-name (an easy reference for programmers, preferably in English).
+       	- Category			TinyText		This is to assist in the Translations @-IF (easier/faster GUI).
+       	- Lang_EN                      	Text			Use LARGECAP two-letter ISO 639-1-Alpha-2 codes only. (Note: the "Lang_" part is required because otherwise Indonesian (ID) could not be used.)
+       	- Lang_NL                       Text			Use LARGECAP two-letter ISO 639-1-Alpha-2 codes only. (Note: the "Lang_" part is required because otherwise Indonesian (ID) could not be used.)
+
+
+* FF2Do: 2Do_Groups
+
+	- ID
+	- Name
+	- Token							The az_AZ-09 conversion of the Name.
+	- Status			TINYINT			BitMask: 1 = isActive, 2 = isPublic
+
+
+* FF2Do: 2Do_UsersGroups
+
+	- ID
+	- UserID
+	- GroupID
+	- Status			TINYINT			BitMask: 1 = isActive, 2 = isAdmin
+
+
+*** MySQL
+
+COLLATION = utf8_general_ci
+CHARACTER SET = utf8
+
+CREATE TABLE `2Do_CheckLists` (
+  `ID` int(11) UNSIGNED NOT NULL auto_increment,
+  `ProjectID` int(11) UNSIGNED NOT NULL,
+  `Name` tinytext collate utf8_general_ci NOT NULL,
+  `Sorting` smallint(3) UNSIGNED NOT NULL,
+  `DateCreated` datetime NOT NULL,
+  `Status` tinyint(1) UNSIGNED NOT NULL,
+  PRIMARY KEY (`ID`),
+  FULLTEXT KEY `Name` (`Name`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE TABLE `2Do_Contexts` (
+  `ID` int(11) UNSIGNED NOT NULL auto_increment,
+  `UserID` int(11) UNSIGNED NOT NULL,
+  `Name` tinytext collate utf8_general_ci NOT NULL,
+  `DateCreated` datetime NOT NULL,
+  `Sorting` smallint(3) UNSIGNED NOT NULL,
+  `Status` tinyint(1) UNSIGNED NOT NULL,
+  PRIMARY KEY (`ID`),
+  FULLTEXT KEY `Name` (`Name`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE TABLE `2Do_Groups` (
+  `ID` int(11) UNSIGNED NOT NULL auto_increment,
+  `Name` tinytext collate utf8_general_ci NOT NULL,
+  `Token` varchar(100) collate utf8_general_ci NOT NULL,
+  `Status` tinyint(1) UNSIGNED NOT NULL,
+  PRIMARY KEY (`ID`),
+  FULLTEXT KEY `Name` (`Name`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE TABLE `2Do_Projects` (
+  `ID` int(11) UNSIGNED NOT NULL auto_increment,
+  `UserID` int(11) UNSIGNED NOT NULL,
+  `Name` tinytext collate utf8_general_ci NOT NULL,
+  `Description` text collate utf8_general_ci NOT NULL,
+  `Postponed` datetime NOT NULL,
+  `DateCreated` datetime NOT NULL,
+  `Sorting` smallint(3) UNSIGNED NOT NULL,
+  `Status` tinyint(1) UNSIGNED NOT NULL,
+  PRIMARY KEY (`ID`),
+  FULLTEXT KEY `Description` (`Description`),
+  FULLTEXT KEY `Name` (`Name`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE TABLE `2Do_Tasks` (
+  `ID` int(11) UNSIGNED NOT NULL auto_increment,
+  `UserID` int(11) UNSIGNED NOT NULL,
+  `ContextID` int(11) UNSIGNED NOT NULL,
+  `ProjectID` int(11) UNSIGNED NOT NULL,
+  `Name` tinytext collate utf8_general_ci NOT NULL,
+  `Notes` varchar(255) collate utf8_general_ci NOT NULL,
+  `DateDue` datetime NOT NULL,
+  `DateCreated` datetime NOT NULL,
+  `Sorting` smallint(3) UNSIGNED NOT NULL,
+  `Status` tinyint(1) UNSIGNED NOT NULL,
+  PRIMARY KEY (`ID`),
+  FULLTEXT KEY `Name` (`Name`),
+  FULLTEXT KEY `Notes` (`Notes`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE TABLE `2Do_Translations` (
+  `ID` int(11) UNSIGNED NOT NULL auto_increment,
+  `Name` tinytext collate utf8_general_ci NOT NULL,
+  `Category` tinytext collate utf8_general_ci NOT NULL,
+  `Lang_EN` text collate utf8_general_ci NOT NULL,
+  `Lang_NL` text collate utf8_general_ci NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE TABLE `2Do_Users` (
+  `ID` int(11) UNSIGNED NOT NULL auto_increment,
+  `UID` varchar(100) collate utf8_general_ci NOT NULL,
+  `PWD` varchar(100) collate utf8_general_ci NOT NULL,
+  `Name` tinytext collate utf8_general_ci NOT NULL,
+  `Email` varchar(100) collate utf8_general_ci NOT NULL,
+  `NotifyEmail` tinyint(1) NOT NULL,
+  `DateBorn` date NOT NULL,
+  `DateCreated` datetime NOT NULL,
+  `DateLogin` datetime NOT NULL,
+  `Status` tinyint(1) UNSIGNED NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+CREATE TABLE `2Do_UsersGroups` (
+  `ID` int(11) UNSIGNED NOT NULL auto_increment,
+  `UserID` int(11) UNSIGNED NOT NULL,
+  `GroupID` int(11) UNSIGNED NOT NULL,
+  `Status` tinyint(1) UNSIGNED NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+
+***
+
+Common Law Copyright 2008 eBrain (c) All rights reserved.
+
+This is unpublished proprietary code of Pallieter Koopmans.
+Your access to it does not give you permission to use it.
+
+***

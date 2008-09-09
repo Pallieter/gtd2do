@@ -1,0 +1,99 @@
+<?php
+	require_once(realpath('Protected/Included.inc'));
+	include_once(realpath('Dates.php'));
+?>
+
+<html style="background-color: buttonface; color: buttontext;">
+
+<head>
+<meta http-equiv="content-type" content="text/xml; charset=utf-8" />
+
+<title>Simple calendar setups [popup calendar]</title>
+
+  <!-- calendar stylesheet -->
+  <link rel="stylesheet" type="text/css" media="all" href="calendar-win2k-cold-1.css" title="win2k-cold-1" />
+
+  <!-- main calendar program -->
+  <script type="text/javascript" src="calendar.js"></script>
+
+  <!-- language for the calendar -->
+  <script type="text/javascript" src="lang/calendar-en.js"></script>
+
+  <!-- the following script defines the Calendar.setup helper function, which makes
+       adding a calendar a matter of 1 or 2 lines of code. -->
+  <script type="text/javascript" src="calendar-setup.js"></script>
+
+</head>
+
+<body>
+
+
+<form action="#" method="get">
+<input type="text" name="date" id="date1" />
+</form>
+
+<script type="text/javascript">
+    
+   Calendar.setup({
+        inputField     :    "date1",   // id of the input field
+        displayArea    :    "date1",
+        eventName      :    "focus",
+        ifFormat       :    "%Y-%m-%d %H:%M",       // format of the input field
+        //daFormat       :    "%Y-%m-%d %H:%M",       // format of the input field
+        align          :    "B",
+        showsTime      :    true,
+        timeFormat     :    "24",
+    });
+   
+</script>
+
+<script type="text/javascript">
+
+$(function()
+{
+        $('#TaskAddForm').submit(function()
+        {
+		$.ajax({
+			url: 'TaskAdd.php',
+			type: 'POST',
+			data: $('input').serialize(),
+			dataType: 'script',
+			timeout: 2000,
+			error: function(xhr, desc, exceptionobj)
+			{
+				alert('Failed to submit: ' + xhr.responseText);
+			},
+			success: function(data, textStatus)
+			{
+				this;
+/*
+				this;
+				alert(textStatus);
+				document.getElementsByTagName('head').item(0).appendChild(data);
+				$("#ResponseBox").html(data);
+				alert(data);
+				alert('Submitted. 2Do: how to get the return data?' + data + ' nad also the status: ' + textStatus);
+*/
+				// 2Do: clear the form
+				// 2Do: maybe: update the dropdown boxes (fancy, but not really needed)
+				// 2Do: optionally add the task to the projects task list in this view, but this might be a bad idea since we should only list the "next actions" tasks here (but, than again, we could be very fancy and ask the server for an answer on what is now the most urgent "next action" for the project the new task was submitted to)
+				// Note: if a new project is added, the task NEEDS to be added to the projects/tasks listed here!
+			}
+		});
+		return false;
+	});
+});
+
+</script>
+
+<input type="submit" value="ADD" tabindex="9" />
+<?php
+	$raul = md5(rand());
+
+echo '<textarea id="Notes" name="Notes" cols="25" rows="6" tabindex="8">'.$raul.'</textarea>';
+?>
+<hr />
+
+
+</body>
+</html>
